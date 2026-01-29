@@ -1,146 +1,139 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
+    
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"
-    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_70b607398a18d744de9020cbac660999 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
 
-    <meta
-      name="viewport"
-      content="width=device-width,
-                initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
-    <style>
-      #map_479cfe773300245675b1a5dca8a8d2a8 {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        left: 0%;
-        top: 0%;
-      }
-      .leaflet-container {
-        font-size: 1rem;
-      }
-    </style>
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
 
-    <style>
-      html,
-      body {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
-    </style>
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
 
-    <style>
-      #map {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        right: 0;
-        left: 0;
-      }
-    </style>
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
 
-    <script>
-      L_NO_TOUCH = false;
-      L_DISABLE_3D = false;
-    </script>
-  </head>
-  <body>
-    <div class="folium-map" id="map_479cfe773300245675b1a5dca8a8d2a8"></div>
-  </body>
-  <script>
-    var map_479cfe773300245675b1a5dca8a8d2a8 = L.map(
-      "map_479cfe773300245675b1a5dca8a8d2a8",
-      {
-        center: [30.6442068, 76.7208453],
-        crs: L.CRS.EPSG3857,
-        ...{
-          zoom: 15,
-          zoomControl: true,
-          preferCanvas: false,
-        },
-      }
-    );
+        
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_70b607398a18d744de9020cbac660999" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_70b607398a18d744de9020cbac660999 = L.map(
+                "map_70b607398a18d744de9020cbac660999",
+                {
+                    center: [30.6441845, 76.7226493],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 15,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
 
-    var tile_layer_dc032e0ad876886a8593810380d4e2bc = L.tileLayer(
-      "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-      {
-        minZoom: 0,
-        maxZoom: 19,
-        maxNativeZoom: 19,
-        noWrap: false,
-        attribution:
-          '\u0026copy; \u003ca href="https://www.openstreetmap.org/copyright"\u003eOpenStreetMap\u003c/a\u003e contributors',
-        subdomains: "abc",
-        detectRetina: false,
-        tms: false,
-        opacity: 1,
-      }
-    );
+                }
+            );
 
-    tile_layer_dc032e0ad876886a8593810380d4e2bc.addTo(
-      map_479cfe773300245675b1a5dca8a8d2a8
-    );
+            
 
-    var marker_da621979809b5406a515fec63b1c8522 = L.marker(
-      [30.6442068, 76.7208453],
-      {}
-    ).addTo(map_479cfe773300245675b1a5dca8a8d2a8);
+        
+    
+            var tile_layer_f179dca1d319d8f368a0c4a31a29895a = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
 
-    var icon_de915fb1d2ad8920550c90fb86856b1f = L.AwesomeMarkers.icon({
-      markerColor: "blue",
-      iconColor: "white",
-      icon: "map-marker",
-      prefix: "glyphicon",
-      extraClasses: "fa-rotate-0",
-    });
+            );
+        
+    
+            tile_layer_f179dca1d319d8f368a0c4a31a29895a.addTo(map_70b607398a18d744de9020cbac660999);
+        
+    
+            var marker_4be199755563d21760070019ec2f6058 = L.marker(
+                [30.6441845, 76.7226493],
+                {
+}
+            ).addTo(map_70b607398a18d744de9020cbac660999);
+        
+    
+            var icon_0fda86d55f29980f033bec5ed7c8b527 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_d5ccbd86ddb9d44b8e4f265c1d13129e = L.popup({
+  "maxWidth": "100%",
+});
 
-    var popup_5fad3c0571c796c51a8d0f67a712d711 = L.popup({
-      maxWidth: "100%",
-    });
+        
+            
+                var html_c5504e3bc2d4b02b2bad1858fb1737d9 = $(`<div id="html_c5504e3bc2d4b02b2bad1858fb1737d9" style="width: 100.0%; height: 100.0%;"><b>City:</b> Manauli<br><b>Lat:</b> 30.6441845<br><b>Lng:</b> 76.7226493</div>`)[0];
+                popup_d5ccbd86ddb9d44b8e4f265c1d13129e.setContent(html_c5504e3bc2d4b02b2bad1858fb1737d9);
+            
+        
 
-    var html_f8e20a654fbdb8cc851d0281b062641f = $(
-      `<div id="html_f8e20a654fbdb8cc851d0281b062641f" style="width: 100.0%; height: 100.0%;"><b>City:</b> Manauli<br><b>Lat:</b> 30.6442068<br><b>Lng:</b> 76.7208453</div>`
-    )[0];
-    popup_5fad3c0571c796c51a8d0f67a712d711.setContent(
-      html_f8e20a654fbdb8cc851d0281b062641f
-    );
+        marker_4be199755563d21760070019ec2f6058.bindPopup(popup_d5ccbd86ddb9d44b8e4f265c1d13129e)
+        ;
 
-    marker_da621979809b5406a515fec63b1c8522.bindPopup(
-      popup_5fad3c0571c796c51a8d0f67a712d711
-    );
-
-    marker_da621979809b5406a515fec63b1c8522.setIcon(
-      icon_de915fb1d2ad8920550c90fb86856b1f
-    );
-  </script>
+        
+    
+    
+                marker_4be199755563d21760070019ec2f6058.setIcon(icon_0fda86d55f29980f033bec5ed7c8b527);
+            
+</script>
 </html>

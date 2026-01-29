@@ -4,11 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Live GPS Tracker</title>
-
     <style>
       body {
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          Roboto, sans-serif;
+        font-family: system-ui, -apple-system, sans-serif;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -16,6 +14,31 @@
         margin: 0;
         background: #f0f2f5;
       }
+
+      /* Modal Background */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex; /* Changed to flex when active */
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        display: none; /* Hidden by default */
+      }
+
+      .modal-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 14px;
+        max-width: 320px;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      }
+
       .container {
         background: white;
         padding: 2rem;
@@ -25,6 +48,7 @@
         text-align: center;
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
       }
+
       h2 {
         color: #1a73e8;
         margin-bottom: 8px;
@@ -32,7 +56,25 @@
       p {
         font-size: 14px;
         color: #5f6368;
+        line-height: 1.5;
       }
+
+      button {
+        margin-top: 15px;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        background: #1a73e8;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      button:hover {
+        background: #1558c0;
+      }
+
       .loader {
         margin: 15px auto 0;
         width: 28px;
@@ -41,7 +83,9 @@
         border-top: 4px solid #1a73e8;
         border-radius: 50%;
         animation: spin 1s linear infinite;
+        display: none;
       }
+
       @keyframes spin {
         to {
           transform: rotate(360deg);
@@ -51,34 +95,114 @@
   </head>
 
   <body>
-    <div class="container">
-      <h2>Your ......</h2>
-      <p id="status">Requesting location permission…</p>
-      <div class="loader" id="loader"></div>
+    <div id="permissionModal" class="modal-overlay">
+      <div class="modal-content">
+        <h3>Location Required</h3>
+        <p>
+          This app uses your GPS coordinates to show you on the map and find
+          your city name.
+        </p>
+        <button onclick="closeModalAndRequest()">Understood, Let's go!</button>
+      </div>
+    </div>
 
-      <form id="locForm" method="POST" action="/location">
-        <input type="hidden" name="lat" id="lat" />
-        <input type="hidden" name="lng" id="lng" />
-      </form>
+    <div class="container">
+      <h2>Location Access</h2>
+      <p id="status">Click the button to share your location</p>
+      <button id="mainBtn" onclick="getLocation()">Allow Location</button>
+      <div class="loader" id="loader"></div>
     </div>
 
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
+      window.onload = function () {
+        if (!localStorage.getItem("visitedBefore")) {
+          document.getElementById("permissionModal").style.display = "flex";
+        }
+      };
+
+      function closeModalAndRequest() {
+        document.getElementById("permissionModal").style.display = "none";
+        localStorage.setItem("visitedBefore", "true");
         getLocation();
-      });
+      }
+
+      async function saveLocation(lat, lng) {
+        const status = document.getElementById("status");
+
+        try {
+          const response = await fetch("/location", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `lat=${lat}&lng=${lng}`,
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            status.innerHTML = `✅ Saved! <br> <b>City:</b> ${result.city}`;
+            document.getElementById("loader").style.display = "none";
+          } else {
+            status.innerText = "Error saving data.";
+          }
+        } catch (error) {
+          status.innerText = "Server connection failed.";
+          console.error(error);
+        }
+      }
 
       function getLocation() {
         const status = document.getElementById("status");
         const loader = document.getElementById("loader");
+        const mainBtn = document.getElementById("mainBtn");
 
-        const options = {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0,
-        };
+        loader.style.display = "block";
+        mainBtn.style.display = "none";
+        status.innerText = "Requesting GPS...";
+
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            status.innerText = "Location found! Saving to database...";
+
+            // Call the silent background save
+            saveLocation(lat, lng);
+          },
+          () => {
+            loader.style.display = "none";
+            mainBtn.style.display = "inline-block";
+            status.innerText = "Permission denied.";
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+      }
+    </script>
+
+    <script>
+      // Check if user is a "New Opener"
+      window.onload = function () {
+        if (!localStorage.getItem("visitedBefore")) {
+          document.getElementById("permissionModal").style.display = "flex";
+        }
+      };
+
+      function closeModalAndRequest() {
+        document.getElementById("permissionModal").style.display = "none";
+        localStorage.setItem("visitedBefore", "true");
+        getLocation(); // Automatically trigger the browser prompt
+      }
+
+      function getLocation() {
+        const status = document.getElementById("status");
+        const loader = document.getElementById("loader");
+        const mainBtn = document.getElementById("mainBtn");
+
+        loader.style.display = "block";
+        mainBtn.style.display = "none";
+        status.innerText = "Requesting location permission…";
 
         if (!navigator.geolocation) {
-          status.innerText = "GPS not supported.";
+          status.innerText = "GPS not supported by this browser.";
           loader.style.display = "none";
           return;
         }
@@ -88,16 +212,16 @@
             status.innerText = "Location found. Loading map…";
             document.getElementById("lat").value = position.coords.latitude;
             document.getElementById("lng").value = position.coords.longitude;
-
             setTimeout(() => {
               document.getElementById("locForm").submit();
-            }, 800);
+            }, 700);
           },
-          (error) => {
+          () => {
             loader.style.display = "none";
-            status.innerText = "Location permission required.";
+            mainBtn.style.display = "inline-block";
+            status.innerText = "Permission denied. Please enable GPS.";
           },
-          options
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
       }
     </script>
