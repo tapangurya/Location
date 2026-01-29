@@ -7,8 +7,11 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-API_KEY = "8eec8ce32a0a47bbb5497ef7d58a9baa"
-DATA_FILE = os.path.join("data", "location.json")
+# READ API KEY FROM ENVIRONMENT (IMPORTANT)
+API_KEY = os.environ.get("OPENCAGE_API_KEY")
+
+DATA_DIR = "data"
+DATA_FILE = os.path.join(DATA_DIR, "location.json")
 
 
 @app.route("/")
@@ -32,20 +35,23 @@ def location():
         or components.get("state")
     )
 
+    # ---------- ENSURE DATA DIRECTORY ----------
+    os.makedirs(DATA_DIR, exist_ok=True)
+
     # ---------- SAVE TO JSON ----------
     entry = {
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": datetime.utcnow().isoformat(),
         "city": city,
         "latitude": lat,
         "longitude": lng,
-        "ip": request.remote_addr
+        "ip": request.headers.get("X-Forwarded-For", request.remote_addr)
     }
 
     if not os.path.exists(DATA_FILE):
         with open(DATA_FILE, "w") as f:
             json.dump([], f)
 
-    with open(DATA_FILE, "r+") as f:
+    with open(DATA_FILE, "r+", encoding="utf-8") as f:
         data = json.load(f)
         data.append(entry)
         f.seek(0)
@@ -56,13 +62,13 @@ def location():
     folium.Marker(
         [lat, lng],
         popup=f"<b>City:</b> {city}<br><b>Lat:</b> {lat}<br><b>Lng:</b> {lng}",
-        icon=folium.Icon(color="blue", icon="map-marker")
+        icon=folium.Icon(color="blue")
     ).add_to(m)
 
     m.save("templates/map.html")
-
     return render_template("map.html")
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
