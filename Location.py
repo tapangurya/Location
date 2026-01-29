@@ -1,30 +1,36 @@
 from flask import Flask, request, render_template, jsonify
 from opencage.geocoder import OpenCageGeocode
-import json
-import os
+from pymongo import MongoClient
 from datetime import datetime
+from dotenv import load_dotenv
+import os
 
 app = Flask(__name__)
 
 # --- CONFIGURATION ---
-API_KEY = "8eec8ce32a0a47bbb5497ef7d58a9baa"
-DATA_DIR = "data"
-DATA_FILE = os.path.join(DATA_DIR, "location.json")
+# Load environment variables
+load_dotenv()
+
+DB_NAME = "location_db"
+COLLECTION_NAME = "locations"
+
+# --- MongoDB Connection ---
+client = MongoClient(MONGO_URI)
+db = client[DB_NAME]
+collection = db[COLLECTION_NAME]
 
 @app.route("/")
 def index():
-    """Renders the main page with the permission modal."""
     return render_template("index.html")
 
 @app.route("/location", methods=["POST"])
 def location():
-    """Handles background AJAX requests to save location data."""
     try:
-        # 1. Get coordinates from the AJAX request
+        # 1. Get coordinates
         lat = float(request.form.get("lat"))
         lng = float(request.form.get("lng"))
 
-        # 2. Reverse Geocoding via OpenCage
+        # 2. Reverse Geocoding
         geocoder = OpenCageGeocode(API_KEY)
         result = geocoder.reverse_geocode(lat, lng)
 
@@ -32,7 +38,6 @@ def location():
             city = "Unknown"
         else:
             components = result[0].get("components", {})
-            # Try to find the best name for the area
             city = (
                 components.get("city")
                 or components.get("town")
@@ -42,34 +47,19 @@ def location():
                 or "Unknown"
             )
 
-        # 3. Prepare the data entry
-        os.makedirs(DATA_DIR, exist_ok=True)
-        entry = {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+        # 3. Prepare document
+        document = {
+            "timestamp": datetime.utcnow(),
             "city": city,
             "latitude": lat,
             "longitude": lng,
             "ip": request.headers.get("X-Forwarded-For", request.remote_addr)
         }
 
-        # 4. Save to JSON file (Thread-safe-ish logic)
-        if not os.path.exists(DATA_FILE):
-            with open(DATA_FILE, "w", encoding="utf-8") as f:
-                json.dump([], f)
+        # 4. Insert into MongoDB
+        collection.insert_one(document)
 
-        data = []
-        with open(DATA_FILE, "r+", encoding="utf-8") as f:
-            try:
-                data = json.load(f)
-            except json.JSONDecodeError:
-                data = []
-            
-            data.append(entry)
-            f.seek(0)
-            json.dump(data, f, indent=4)
-            f.truncate() # Ensure old data is cleared if file size shrinks
-
-        # 5. Return JSON instead of a new page
+        # 5. Response
         return jsonify({
             "status": "success",
             "message": "Location saved successfully",
@@ -78,13 +68,12 @@ def location():
         }), 200
 
     except Exception as e:
-        print(f"Error: {e}")
+        print(e)
         return jsonify({
             "status": "error",
             "message": str(e)
         }), 500
 
 if __name__ == "__main__":
-    # Ensure port is pulled from environment for hosting (like Heroku/Render)
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
