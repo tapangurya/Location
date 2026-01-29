@@ -5,6 +5,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 import os
 
+
 app = Flask(__name__)
 
 # --- CONFIGURATION ---
@@ -14,10 +15,21 @@ load_dotenv()
 DB_NAME = "location_db"
 COLLECTION_NAME = "locations"
 
+
 # --- MongoDB Connection ---
-client = MongoClient(MONGO_URI)
-db = client[DB_NAME]
-collection = db[COLLECTION_NAME]
+API_KEY = os.getenv("OPENCAGE_API_KEY")
+MONGO_URI = os.getenv("MONGO_URI")
+
+print(f"[DEBUG] MONGO_URI: {MONGO_URI}")
+try:
+    client = MongoClient(MONGO_URI)
+    db = client[DB_NAME]
+    collection = db[COLLECTION_NAME]
+    print("[DEBUG] MongoDB connection established.")
+except Exception as conn_err:
+    print(f"[ERROR] Could not connect to MongoDB: {conn_err}")
+    collection = None
+
 
 @app.route("/")
 def index():
@@ -26,6 +38,8 @@ def index():
 @app.route("/location", methods=["POST"])
 def location():
     try:
+        if collection is None:
+            raise Exception("MongoDB collection is not initialized. Check connection.")
         # 1. Get coordinates
         lat = float(request.form.get("lat"))
         lng = float(request.form.get("lng"))
@@ -56,8 +70,16 @@ def location():
             "ip": request.headers.get("X-Forwarded-For", request.remote_addr)
         }
 
+
         # 4. Insert into MongoDB
-        collection.insert_one(document)
+        try:
+            was_empty = collection.count_documents({}) == 0
+            collection.insert_one(document)
+            if was_empty:
+                print(f"[INFO] Database '{DB_NAME}' and collection '{COLLECTION_NAME}' created (first document inserted).")
+        except Exception as db_err:
+            print(f"[ERROR] Failed to insert document: {db_err}")
+            raise Exception(f"Failed to insert document: {db_err}")
 
         # 5. Response
         return jsonify({
